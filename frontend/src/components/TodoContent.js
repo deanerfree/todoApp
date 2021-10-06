@@ -1,24 +1,44 @@
 import { useEffect, useState } from "react"
+import "../App.css"
 import axios from "axios"
 import { Formik } from "formik"
 import TodoItem from "./TodoItem"
+import Button from "@mui/material/Button"
+import TextField from "@mui/material/TextField"
 
 const TodoContent = () => {
 	const [currentListItems, setCurrentListItems] = useState([])
 	const [status, setStatus] = useState()
 	const currentDate = new Date()
-	const options = [{ status: "In Process" }, { status: "Completed" }]
+	const options = [
+		{ status: "Not Started" },
+		{ status: "In Process" },
+		{ status: "Completed" },
+	]
 
+	const initialValues = {
+		id: 0,
+		status: null,
+		task: "",
+		description: "",
+		dateCreated: currentDate,
+		dateUpdated: currentDate,
+	}
 	const getCurrentList = async () => {
 		const theData = await axios.get("/v1/api/todoList")
 		try {
 			if (theData.status === 200) {
-				setCurrentListItems(theData.data)
+				const list = theData.data
+				setCurrentListItems(list)
 			}
 		} catch (error) {
 			console.error({ message: `This is the Error`, error })
 		}
-		setCurrentListItems(theData.data)
+	}
+
+	const removeItem = (id) => {
+		axios.delete(`/v1/api/removeItem/${id}`)
+		getCurrentList()
 	}
 
 	useEffect(() => {
@@ -31,16 +51,14 @@ const TodoContent = () => {
 			<h2>Todo Content</h2>
 			<div>
 				<Formik
-					initialValues={{
-						task: "",
-						description: "",
-						dateCreated: currentDate,
-						dateUpdated: currentDate,
-					}}
-					onSubmit={(values, { setSubmitting }) => {
+					initialValues={initialValues}
+					onSubmit={(values, { setSubmitting, resetForm }) => {
+						values.id = currentListItems.length
+						values.status = options[0].status
 						axios.post("/v1/api/createItem", values)
 						getCurrentList()
 						setSubmitting(false)
+						resetForm(initialValues)
 					}}>
 					{({
 						values,
@@ -54,26 +72,28 @@ const TodoContent = () => {
 					}) => (
 						<form onSubmit={handleSubmit}>
 							<h2>Title</h2>
-							<input
+							<TextField
 								type='task'
 								name='task'
+								placeholder='Enter a title'
 								onChange={handleChange}
 								onBlur={handleBlur}
 								value={values.task}
 							/>
 							{errors.task && touched.task && errors.task}
 							<h2>Description</h2>
-							<input
+							<TextField
 								type='description'
 								name='description'
+								placeholder='Enter a description'
 								onChange={handleChange}
 								onBlur={handleBlur}
 								value={values.description}
 							/>
 
-							<button type='submit' disabled={isSubmitting}>
+							<Button variant='outlined' type='submit' disabled={isSubmitting}>
 								Submit
-							</button>
+							</Button>
 						</form>
 					)}
 				</Formik>
@@ -85,6 +105,7 @@ const TodoContent = () => {
 							return (
 								<div key={index}>
 									<TodoItem props={item} />
+									<button onClick={() => removeItem(index)}>X</button>
 								</div>
 							)
 						})}
