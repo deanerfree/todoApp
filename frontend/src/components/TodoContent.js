@@ -33,12 +33,9 @@ const TodoContent = () => {
 					initialValues={{ title: "", description: "", date: "" }}
 					onSubmit={(values, { setSubmitting }) => {
 						axios.post("/v1/api/createItem", values)
-						values.date = currentDate
+						values.dateCreated = currentDate
+						values.dateUpdated = currentDate
 						getCurrentList()
-						setTimeout(() => {
-							alert(JSON.stringify(values, null, 2))
-							setSubmitting(false)
-						}, 400)
 					}}>
 					{({
 						values,
