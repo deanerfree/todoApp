@@ -3,8 +3,8 @@ import "../App.css"
 import axios from "axios"
 import { Formik } from "formik"
 import TodoItem from "./TodoItem"
-import Button from "@mui/material/Button"
-import TextField from "@mui/material/TextField"
+import { Button, TextField, Card } from "@mui/material"
+import { Close } from "@mui/icons-material"
 
 const TodoContent = () => {
 	const [currentListItems, setCurrentListItems] = useState([])
@@ -49,7 +49,7 @@ const TodoContent = () => {
 	return (
 		<div>
 			<h2>Todo Content</h2>
-			<div>
+			<Card className='form'>
 				<Formik
 					initialValues={initialValues}
 					onSubmit={(values, { setSubmitting, resetForm }) => {
@@ -97,21 +97,23 @@ const TodoContent = () => {
 						</form>
 					)}
 				</Formik>
-			</div>
+			</Card>
 			<div>
 				{currentListItems.length > 0 ? (
-					<div>
+					<Card className='taskList'>
 						{currentListItems?.map((item, index) => {
 							return (
 								<div key={index}>
 									<TodoItem props={item} />
-									<button onClick={() => removeItem(index)}>X</button>
+									<Button onClick={() => removeItem(index)}>
+										<Close color='primary' />
+									</Button>
 								</div>
 							)
 						})}
-					</div>
+					</Card>
 				) : (
-					<p>There's nothing to display</p>
+					<Card>There's nothing to display</Card>
 				)}
 			</div>
 		</div>

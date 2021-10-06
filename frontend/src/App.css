@@ -3,6 +3,13 @@
 	font-family: "Roboto";
 }
 
-/* h2 {
-	font-family: "Roboto";
-} */
+.form {
+	margin: 10px;
+	padding: 10px;
+}
+
+.taskList {
+	margin: 10px;
+	padding: 10px;
+	background-color: #39bbf7;
+}
