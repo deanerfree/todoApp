@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
 import { Formik } from "formik"
+import TodoItem from "./TodoItem"
 
 const TodoContent = () => {
 	const [currentListItems, setCurrentListItems] = useState([])
@@ -30,12 +31,16 @@ const TodoContent = () => {
 			<h2>Todo Content</h2>
 			<div>
 				<Formik
-					initialValues={{ title: "", description: "", date: "" }}
+					initialValues={{
+						task: "",
+						description: "",
+						dateCreated: currentDate,
+						dateUpdated: currentDate,
+					}}
 					onSubmit={(values, { setSubmitting }) => {
 						axios.post("/v1/api/createItem", values)
-						values.dateCreated = currentDate
-						values.dateUpdated = currentDate
 						getCurrentList()
+						setSubmitting(false)
 					}}>
 					{({
 						values,
@@ -50,13 +55,13 @@ const TodoContent = () => {
 						<form onSubmit={handleSubmit}>
 							<h2>Title</h2>
 							<input
-								type='title'
-								name='title'
+								type='task'
+								name='task'
 								onChange={handleChange}
 								onBlur={handleBlur}
-								value={values.title}
+								value={values.task}
 							/>
-							{errors.title && touched.title && errors.title}
+							{errors.task && touched.task && errors.task}
 							<h2>Description</h2>
 							<input
 								type='description'
@@ -78,9 +83,9 @@ const TodoContent = () => {
 					<div>
 						{currentListItems?.map((item, index) => {
 							return (
-								<ul key={index}>
-									<li>{item.title}</li>
-								</ul>
+								<div key={index}>
+									<TodoItem props={item} />
+								</div>
 							)
 						})}
 					</div>
