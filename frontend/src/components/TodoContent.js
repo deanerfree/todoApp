@@ -5,6 +5,7 @@ import { Formik } from "formik"
 import TodoItem from "./TodoItem"
 import { Button, TextField, Card } from "@mui/material"
 import { Close } from "@mui/icons-material"
+import LoadingContent from "./LoadingContent"
 
 const TodoContent = () => {
 	const [currentListItems, setCurrentListItems] = useState([])
@@ -23,6 +24,7 @@ const TodoContent = () => {
 		description: "",
 		dateCreated: currentDate,
 		dateUpdated: currentDate,
+		dateFinished: null,
 	}
 	const getCurrentList = async () => {
 		const theData = await axios.get("/v1/api/todoList")
@@ -33,6 +35,16 @@ const TodoContent = () => {
 			}
 		} catch (error) {
 			console.error({ message: `This is the Error`, error })
+		}
+	}
+
+	const taskCompleted = (listItem) => {
+		if (listItem === "Completed") {
+			let value = listItem.dateFinished - listItem.dateUpdated
+			return value
+		}
+		if (listItem !== "Completed") {
+			return
 		}
 	}
 
@@ -49,7 +61,7 @@ const TodoContent = () => {
 	return (
 		<div>
 			<h2>Todo Content</h2>
-			<Card className='form'>
+			<Card className='formWrapper'>
 				<Formik
 					initialValues={initialValues}
 					onSubmit={(values, { setSubmitting, resetForm }) => {
@@ -70,30 +82,44 @@ const TodoContent = () => {
 						isSubmitting,
 						/* and other goodies */
 					}) => (
-						<form onSubmit={handleSubmit}>
-							<h2>Title</h2>
-							<TextField
-								type='task'
-								name='task'
-								placeholder='Enter a title'
-								onChange={handleChange}
-								onBlur={handleBlur}
-								value={values.task}
-							/>
-							{errors.task && touched.task && errors.task}
-							<h2>Description</h2>
-							<TextField
-								type='description'
-								name='description'
-								placeholder='Enter a description'
-								onChange={handleChange}
-								onBlur={handleBlur}
-								value={values.description}
-							/>
-
-							<Button variant='outlined' type='submit' disabled={isSubmitting}>
-								Submit
-							</Button>
+						<form className='form' onSubmit={handleSubmit}>
+							<div className='formInputs'>
+								<h2>Task</h2>
+								<TextField
+									type='task'
+									fullWidth
+									name='task'
+									placeholder='Enter a Task'
+									onChange={handleChange}
+									onBlur={handleBlur}
+									value={values.task}
+								/>
+								{errors.task && touched.task && errors.task}
+								<h2>Description</h2>
+								<TextField
+									variant='outlined'
+									placeholder='Enter a description'
+									id='outlined-multiline-static'
+									label='Description'
+									fullWidth
+									multiline
+									rows={4}
+									type='description'
+									name='description'
+									onChange={handleChange}
+									onBlur={handleBlur}
+									value={values.description}
+									style={{ height: 100, marginBottom: "35px" }}
+								/>
+							</div>
+							<div className='formSubmit'>
+								<Button
+									variant='outlined'
+									type='submit'
+									disabled={isSubmitting}>
+									Submit
+								</Button>
+							</div>
 						</form>
 					)}
 				</Formik>
@@ -120,7 +146,7 @@ const TodoContent = () => {
 						})}
 					</div>
 				) : (
-					<Card>There's nothing to display</Card>
+					<LoadingContent />
 				)}
 			</Card>
 		</div>
