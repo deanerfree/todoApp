@@ -7,9 +7,33 @@
 	margin: 10px;
 	padding: 10px;
 }
-
+.itemTask {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
 .taskList {
+	display: flex;
+	flex-direction: column;
 	margin: 10px;
 	padding: 10px;
 	background-color: #39bbf7;
+}
+
+.item {
+	display: flex;
+	flex-direction: column;
+	margin: 10px;
+	padding: 10px;
+}
+.itemDescription {
+	display: flex;
+	flex-direction: column;
+}
+#created {
+	align-self: flex-end;
+	font-size: 10px;
+	color: #b0b0b0;
+}
+#description {
 }

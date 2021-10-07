@@ -98,24 +98,31 @@ const TodoContent = () => {
 					)}
 				</Formik>
 			</Card>
-			<div>
+			<Card className='taskList'>
 				{currentListItems.length > 0 ? (
-					<Card className='taskList'>
+					<div className='itemWrapper'>
 						{currentListItems?.map((item, index) => {
 							return (
-								<div key={index}>
-									<TodoItem props={item} />
-									<Button onClick={() => removeItem(index)}>
-										<Close color='primary' />
-									</Button>
-								</div>
+								<Card className='item' key={index}>
+									<div className='itemTask'>
+										<h2>Task: {item.task}</h2>
+										<Button
+											className='closeButton'
+											onClick={() => removeItem(index)}>
+											<Close color='primary' />
+										</Button>
+									</div>
+									<div>
+										<TodoItem props={item} />
+									</div>
+								</Card>
 							)
 						})}
-					</Card>
+					</div>
 				) : (
 					<Card>There's nothing to display</Card>
 				)}
-			</div>
+			</Card>
 		</div>
 	)
 }

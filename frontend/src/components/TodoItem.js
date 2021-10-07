@@ -1,9 +1,12 @@
 const TodoItem = ({ props }) => {
 	return (
-		<div>
-			<h2>Task: {props.task}</h2>
-			<p>Description: {props.description}</p>
-			<p>Created on: {props.dateCreated}</p>
+		<div className='itemDescription'>
+			<div id='description'>
+				<p>Description: {props.description}</p>
+			</div>
+			<div id='created'>
+				<p>Created on: {props.dateCreated}</p>
+			</div>
 		</div>
 	)
 }
