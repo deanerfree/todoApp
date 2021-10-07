@@ -3,13 +3,14 @@ import "../App.css"
 import axios from "axios"
 import { Formik } from "formik"
 import TodoItem from "./TodoItem"
-import { Button, TextField, Card } from "@mui/material"
+import { Button, TextField, Card, Modal } from "@mui/material"
 import { Close } from "@mui/icons-material"
 import LoadingContent from "./LoadingContent"
+import SelectTodoItem from "./SelectTodoItem"
 
 const TodoContent = () => {
 	const [currentListItems, setCurrentListItems] = useState([])
-	const [status, setStatus] = useState()
+	const [open, setOpen] = useState(false)
 	const currentDate = new Date()
 	const options = [
 		{ status: "Not Started" },
@@ -26,8 +27,13 @@ const TodoContent = () => {
 		dateUpdated: currentDate,
 		dateFinished: null,
 	}
+
+	const toggleModal = () => {
+		setOpen(!open)
+	}
+
 	const getCurrentList = async () => {
-		const theData = await axios.get("/v1/api/todoList")
+		const theData = await axios.get(`/v1/api/todoList`)
 		try {
 			if (theData.status === 200) {
 				const list = theData.data
@@ -38,15 +44,15 @@ const TodoContent = () => {
 		}
 	}
 
-	const taskCompleted = (listItem) => {
-		if (listItem === "Completed") {
-			let value = listItem.dateFinished - listItem.dateUpdated
-			return value
-		}
-		if (listItem !== "Completed") {
-			return
-		}
-	}
+	// const taskCompleted = (listItem) => {
+	// 	if (listItem === "Completed") {
+	// 		let value = listItem.dateFinished - listItem.dateUpdated
+	// 		return value
+	// 	}
+	// 	if (listItem !== "Completed") {
+	// 		return
+	// 	}
+	// }
 
 	const removeItem = (id) => {
 		axios.delete(`/v1/api/removeItem/${id}`)
@@ -138,8 +144,17 @@ const TodoContent = () => {
 											<Close color='primary' />
 										</Button>
 									</div>
-									<div>
+									<div onClick={toggleModal}>
 										<TodoItem props={item} />
+										<Modal
+											open={open}
+											onClose={toggleModal}
+											aria-labelledby='parent-modal-title'
+											aria-describedby='parent-modal-description'>
+											<Card>
+												<SelectTodoItem index={index} />
+											</Card>
+										</Modal>
 									</div>
 								</Card>
 							)

@@ -5,10 +5,9 @@ const LoadingContent = () => {
 		<Card style={{ height: "200px" }}>
 			<CardContent
 				style={{
-					margin: "30px",
+					padding: "12%",
 					display: "flex",
 					justifyContent: "center",
-					alignContent: "center",
 				}}>
 				There's no content loaded
 			</CardContent>
