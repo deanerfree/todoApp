@@ -59,3 +59,27 @@
 	align-self: flex-start;
 	font-size: 14px;
 }
+
+.editField {
+	margin: 10px;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+.editIcons {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.editIcon {
+	margin: 10px;
+}
+@media screen and (max-width: 750px) {
+	.taskList {
+		width: 300px;
+		margin: 10px;
+		padding: 10px;
+		background-color: #39bbf7;
+	}
+}

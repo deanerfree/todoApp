@@ -2,16 +2,15 @@ import { useEffect, useState } from "react"
 import "../App.css"
 import axios from "axios"
 import { Formik } from "formik"
-import TodoItem from "./TodoItem"
 import { Button, TextField, Card, Modal } from "@mui/material"
-import { Close } from "@mui/icons-material"
 import LoadingContent from "./LoadingContent"
-import SelectTodoItem from "./SelectTodoItem"
+import TodoList from "./TodoList"
 
 const TodoContent = () => {
 	const [currentListItems, setCurrentListItems] = useState([])
-	const [open, setOpen] = useState(false)
+
 	const currentDate = new Date()
+
 	const options = [
 		{ status: "Not Started" },
 		{ status: "In Process" },
@@ -19,17 +18,13 @@ const TodoContent = () => {
 	]
 
 	const initialValues = {
-		id: 0,
+		id: null,
 		status: null,
 		task: "",
 		description: "",
 		dateCreated: currentDate,
 		dateUpdated: currentDate,
 		dateFinished: null,
-	}
-
-	const toggleModal = () => {
-		setOpen(!open)
 	}
 
 	const getCurrentList = async () => {
@@ -43,16 +38,6 @@ const TodoContent = () => {
 			console.error({ message: `This is the Error`, error })
 		}
 	}
-
-	// const taskCompleted = (listItem) => {
-	// 	if (listItem === "Completed") {
-	// 		let value = listItem.dateFinished - listItem.dateUpdated
-	// 		return value
-	// 	}
-	// 	if (listItem !== "Completed") {
-	// 		return
-	// 	}
-	// }
 
 	const removeItem = (id) => {
 		axios.delete(`/v1/api/removeItem/${id}`)
@@ -70,7 +55,7 @@ const TodoContent = () => {
 			<Card className='formWrapper'>
 				<Formik
 					initialValues={initialValues}
-					onSubmit={(values, { setSubmitting, resetForm }) => {
+					onSubmit={async (values, { setSubmitting, resetForm }) => {
 						values.id = currentListItems.length
 						values.status = options[0].status
 						axios.post("/v1/api/createItem", values)
@@ -100,7 +85,7 @@ const TodoContent = () => {
 									onBlur={handleBlur}
 									value={values.task}
 								/>
-								{errors.task && touched.task && errors.task}
+								{errors.task && touched.task}
 								<h2>Description</h2>
 								<TextField
 									variant='outlined'
@@ -132,34 +117,11 @@ const TodoContent = () => {
 			</Card>
 			<Card className='taskList'>
 				{currentListItems.length > 0 ? (
-					<div className='itemWrapper'>
-						{currentListItems?.map((item, index) => {
-							return (
-								<Card className='item' key={index}>
-									<div className='itemTask'>
-										<h2>Task: {item.task}</h2>
-										<Button
-											className='closeButton'
-											onClick={() => removeItem(index)}>
-											<Close color='primary' />
-										</Button>
-									</div>
-									<div onClick={toggleModal}>
-										<TodoItem props={item} />
-										<Modal
-											open={open}
-											onClose={toggleModal}
-											aria-labelledby='parent-modal-title'
-											aria-describedby='parent-modal-description'>
-											<Card>
-												<SelectTodoItem index={index} />
-											</Card>
-										</Modal>
-									</div>
-								</Card>
-							)
-						})}
-					</div>
+					<TodoList
+						getCurrentList={getCurrentList}
+						currentListItems={currentListItems}
+						removeItem={removeItem}
+					/>
 				) : (
 					<LoadingContent />
 				)}
