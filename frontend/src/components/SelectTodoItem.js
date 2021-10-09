@@ -12,7 +12,7 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 	const [task, setTask] = useState()
 	const [description, setDescription] = useState()
 	const [status, setStatus] = useState()
-	const [editTask, setEditTask] = useState(false)
+	const [createTask, setCreateTask] = useState(false)
 	const [editDescription, setEditDescription] = useState(false)
 	const [editStatus, setEditStatus] = useState(false)
 
@@ -25,18 +25,9 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 		task: "",
 		description: "",
 	}
-	const taskCompleted = (listItem) => {
-		if (listItem === "Completed") {
-			let value = listItem.dateFinished - listItem.dateUpdated
-			return value
-		}
-		if (listItem !== "Completed") {
-			return
-		}
-	}
 
 	const changeTask = () => {
-		setEditTask(!editTask)
+		setCreateTask(!createTask)
 	}
 	const changeDescription = () => {
 		setEditDescription(!editDescription)
@@ -96,7 +87,7 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 				}) =>
 					task || description || status ? (
 						<div>
-							{editTask ? (
+							{createTask ? (
 								<form onSubmit={handleSubmit}>
 									<div>
 										<div className='form' onSubmit={handleSubmit}>

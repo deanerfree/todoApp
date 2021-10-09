@@ -25,6 +25,7 @@ const TodoContent = () => {
 		dateCreated: currentDate,
 		dateUpdated: currentDate,
 		dateFinished: null,
+		timeOnTask: 0,
 	}
 
 	const getCurrentList = async () => {
@@ -39,8 +40,28 @@ const TodoContent = () => {
 		}
 	}
 
+	const taskCompleted = (listItem) => {
+		let value = 0
+
+		if (listItem === "Completed") {
+			if (listItem.timeOnTask === 0) {
+				value = listItem.dateFinished - listItem.dateCreated
+				return value
+			}
+			if (listItem.timeOnTask > 0) {
+				value =
+					listItem.dateFinished - listItem.dateUpdated + listItem.timeOnTask
+				return value
+			}
+			listItem.timeOnTask = value
+		}
+		if (listItem !== "Completed") {
+			return
+		}
+	}
+
 	const removeItem = (id) => {
-		axios.delete(`/v1/api/removeItem/${id}`)
+		axios.delete(`/v1/api/removeItem/${id}`).then((res) => res.data)
 		getCurrentList()
 	}
 
@@ -58,6 +79,7 @@ const TodoContent = () => {
 					onSubmit={async (values, { setSubmitting, resetForm }) => {
 						values.id = currentListItems.length
 						values.status = options[0].status
+						values.timeOnTask = 0
 						axios.post("/v1/api/createItem", values)
 						getCurrentList()
 						setSubmitting(false)
