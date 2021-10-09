@@ -78,6 +78,7 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 					values.id = itemId
 					values.dateUpdated = currentDate
 					values.dateCreated = createDate
+					console.log(values)
 					patchValues(itemId, values)
 					setSubmitting(false)
 					resetForm(initialValues)
@@ -93,7 +94,7 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 					isSubmitting,
 					/* and other goodies */
 				}) =>
-					task && description && status ? (
+					task || description || status ? (
 						<div>
 							{editTask ? (
 								<form onSubmit={handleSubmit}>
