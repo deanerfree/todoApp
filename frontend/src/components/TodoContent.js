@@ -22,8 +22,8 @@ const TodoContent = () => {
 		status: null,
 		task: "",
 		description: "",
-		dateCreated: currentDate,
-		dateUpdated: currentDate,
+		dateCreated: 0,
+		dateUpdated: 0,
 		dateFinished: null,
 		timeOnTask: 0,
 	}
@@ -37,26 +37,6 @@ const TodoContent = () => {
 			}
 		} catch (error) {
 			console.error({ message: `This is the Error`, error })
-		}
-	}
-
-	const taskCompleted = (listItem) => {
-		let value = 0
-
-		if (listItem === "Completed") {
-			if (listItem.timeOnTask === 0) {
-				value = listItem.dateFinished - listItem.dateCreated
-				return value
-			}
-			if (listItem.timeOnTask > 0) {
-				value =
-					listItem.dateFinished - listItem.dateUpdated + listItem.timeOnTask
-				return value
-			}
-			listItem.timeOnTask = value
-		}
-		if (listItem !== "Completed") {
-			return
 		}
 	}
 
@@ -80,6 +60,9 @@ const TodoContent = () => {
 						values.id = currentListItems.length
 						values.status = options[0].status
 						values.timeOnTask = 0
+						values.dateCreated = currentDate.getDate()
+						values.dateUpdated = currentDate.getDate()
+						values.dateFinished = 0
 						axios.post("/v1/api/createItem", values)
 						getCurrentList()
 						setSubmitting(false)

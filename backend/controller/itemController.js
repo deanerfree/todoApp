@@ -17,7 +17,6 @@ const getAllItems = async (req, res) => {
 const getItem = async (req, res) => {
 	try {
 		const id = req.params.id
-		console.log(id)
 		await res.send(itemList[id])
 	} catch (error) {
 		console.error(`This is the Error: ${error}`)

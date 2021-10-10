@@ -75,6 +75,15 @@
 .editIcon {
 	margin: 10px;
 }
+
+.buttonWrapper {
+	margin: 10px;
+	display: flex;
+	justify-content: flex-start;
+}
+.buttonItems {
+	margin: 10px;
+}
 @media screen and (max-width: 750px) {
 	.taskList {
 		width: 300px;

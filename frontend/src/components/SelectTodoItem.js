@@ -2,28 +2,56 @@ import { useEffect, useState } from "react"
 import "../App.css"
 import axios from "axios"
 import { Field, Formik } from "formik"
-import { Button, Card, Typography } from "@mui/material"
+import {
+	Button,
+	Card,
+	Typography,
+	Radio,
+	RadioGroup,
+	FormControl,
+	FormControlLabel,
+} from "@mui/material"
+import { Edit, Close } from "@mui/icons-material"
+
 import LoadingContent from "./LoadingContent"
 import DisplayTodoContent from "./DisplayTodoContent"
-import { Edit, Close } from "@mui/icons-material"
+import moment from "moment"
+
+const options = [
+	{ value: "Not Started" },
+	{ value: "In Process" },
+	{ value: "Completed" },
+]
+const currentDate = new Date()
 
 const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 	const [createDate, setCreateDate] = useState()
+	const [updatedDate, setUpdatedDate] = useState()
+	const [finishedDate, setFinishedDate] = useState()
 	const [task, setTask] = useState()
 	const [description, setDescription] = useState()
-	const [status, setStatus] = useState()
+	const [timeOnTask, setTimeOnTask] = useState()
+	const [status, setStatus] = useState(options[0].value)
 	const [createTask, setCreateTask] = useState(false)
 	const [editDescription, setEditDescription] = useState(false)
 	const [editStatus, setEditStatus] = useState(false)
 
 	const actionType = ["Task", "Description", "Status"]
 
-	const currentDate = new Date()
-
 	const initialValues = {
-		status: "",
+		status: status,
 		task: "",
 		description: "",
+	}
+
+	const handleRadioChange = (event) => {
+		setStatus(event.target.value)
+		if (event.target.value === options[2].value) {
+			setFinishedDate(currentDate)
+		}
+		if (event.target.value === options[1].value) {
+			setUpdatedDate(currentDate)
+		}
 	}
 
 	const changeTask = () => {
@@ -36,21 +64,45 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 		setEditStatus(!editStatus)
 	}
 
+	const taskCompleted = (status, dtSt, dtFn) => {
+		let value = 0
+		if (status === "Completed") {
+			let diff = moment(dtFn, "DD/MM/YYYY HH:mm:ss").diff(
+				moment(dtSt, "DD/MM/YYYY HH:mm:ss")
+			)
+			if (diff < 60) {
+				value = `${diff} seconds`
+			}
+			if (diff >= 60) {
+				value = `${diff / 60} minutes`
+			}
+			if (diff >= 3600) {
+				value = `${diff / 3600} hours`
+			}
+			if (diff >= 86400) {
+				value = `${diff / 86400} days`
+			}
+		}
+		console.log("Task completed Value:", value)
+		return value
+	}
+
 	const getItems = async (id) => {
 		let results = await axios.get(`/v1/api/todoList/${id}`)
 		let returnedResults = results.data
 		console.log(results.data)
 		setCreateDate(returnedResults.dateCreated)
+		setUpdatedDate(returnedResults.dateUpdated)
 		setTask(returnedResults.task)
 		setDescription(returnedResults.description)
 		setStatus(returnedResults.status)
+		setTimeOnTask(returnedResults.timeOnTask)
+
+		console.log(typeof returnedResults.dateUpdated)
 	}
 
 	const patchValues = (id, values) => {
-		axios
-			.patch(`/v1/api/editItem/${id}`, values)
-			.then((res) => res.data)
-			.then(getCurrentList())
+		axios.patch(`/v1/api/editItem/${id}`, values).then((res) => res.data)
 	}
 
 	useEffect(() => {
@@ -61,19 +113,35 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 		}
 	}, [])
 
+	// status, dtSt, dtFn
+
 	return (
-		<Card>
+		<Card
+			style={{
+				backgroundColor: "#b3eaff",
+			}}>
 			<Formik
 				initialValues={initialValues}
 				onSubmit={(values, { setSubmitting, resetForm }) => {
+					if (values.task === "") {
+						values.task = task
+					}
+					if (values.description === "") {
+						values.description = description
+					}
 					values.id = itemId
-					values.dateUpdated = currentDate
+					values.status = status
 					values.dateCreated = createDate
-					console.log(values)
+					values.dateUpdated = updatedDate
+					values.dateFinished = finishedDate
+					values.timeOnTask = taskCompleted(status, updatedDate, finishedDate)
+
+					console.log("submitvalues:", values)
 					patchValues(itemId, values)
 					setSubmitting(false)
 					resetForm(initialValues)
 					changeTask()
+					getCurrentList()
 				}}>
 				{({
 					values,
@@ -108,24 +176,58 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 												onChange={handleChange}
 											/>
 											<Typography>Status: {status}</Typography>
-											<Field
-												type='status'
-												name='status'
-												placeholder={status}
-												value={values.status}
-												onChange={handleChange}
-											/>
+
+											<FormControl component='fieldset'>
+												<RadioGroup
+													aria-label='Task Status'
+													defaultValue='Not Started'
+													name='radio-buttons-group'
+													value={status}
+													onChange={handleRadioChange}>
+													<FormControlLabel
+														value={options[0].value}
+														control={<Radio />}
+														label='Not Started'
+													/>
+													<FormControlLabel
+														value={options[1].value}
+														control={<Radio />}
+														label='In Process'
+													/>
+													<FormControlLabel
+														value={options[2].value}
+														control={<Radio />}
+														label='Complete'
+													/>
+												</RadioGroup>
+											</FormControl>
 										</div>
-										<Button
-											variant='outlined'
-											type='submit'
-											disabled={isSubmitting}>
-											Submit
-										</Button>
+										<div className='buttonWrapper'>
+											<div className='buttonItems'>
+												<Button
+													variant='outlined'
+													type='submit'
+													disabled={isSubmitting}>
+													Submit
+												</Button>
+											</div>
+											<div className='buttonItems'>
+												<Button
+													style={{ backgroundColor: "red", color: "white" }}
+													variant='outlined'
+													type='cancel'
+													onClick={changeTask}>
+													Cancel
+												</Button>
+											</div>
+										</div>
 									</div>
 								</form>
 							) : (
-								<Card>
+								<Card
+									style={{
+										backgroundColor: "#b3eaff",
+									}}>
 									<div className='editField'>
 										<Typography>Todo Item {itemId + 1}</Typography>
 										<div className='editIcons'>
@@ -137,7 +239,7 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 											</div>
 										</div>
 									</div>
-									<div className='form'>
+									<Card className='form'>
 										<DisplayTodoContent
 											type={actionType[0]}
 											item={task}
@@ -153,7 +255,7 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 											item={status}
 											editItem={changeEditStatus}
 										/>
-									</div>
+									</Card>
 								</Card>
 							)}
 						</div>
