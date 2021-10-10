@@ -42,7 +42,6 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 		status: status,
 		task: "",
 		description: "",
-		updatedDate: 0,
 	}
 
 	const handleUpdateDate = () => {
@@ -50,7 +49,7 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 	}
 
 	const handleFinishedDate = () => {
-		console.log("handle finsihed")
+		console.log("handle finished")
 		setFinishedDate(currentDate)
 	}
 
@@ -68,28 +67,32 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 		setEditStatus(!editStatus)
 	}
 
-	const taskCompleted = (status, dtSt, dtFn) => {
+	const taskCompleted = (status, dtSt, dtFn, tmtsk) => {
+		if (status !== "Completed") return tmtsk
 		let value = { time: 0, message: "" }
-		if (status !== "Completed") return
-		if (status === "Completed") {
-			let diff = moment(dtFn, "DD/MM/YYYY HH:mm:ss").diff(
-				moment(dtSt, "DD/MM/YYYY HH:mm:ss")
-			)
-			value.time = diff
-			diff = diff / 1000
-			console.log(diff)
+		let diff = moment(dtFn, "DD/MM/YYYY HH:mm:ss").diff(
+			moment(dtSt, "DD/MM/YYYY HH:mm:ss")
+		)
+		let diffToSec = diff / 1000
+		value.time = diffToSec
 
-			if (diff < 60) {
-				value.message = `${diff} seconds`
+		console.log(diffToSec)
+		if (status === "Completed") {
+			if (tmtsk.time > 0) {
+				value.time = diffToSec + tmtsk
 			}
-			if (diff >= 60) {
-				value.message = `${diff / 60} minutes`
+
+			if (diffToSec < 60) {
+				value.message = `${diffToSec} seconds`
 			}
-			if (diff >= 3600) {
-				value.message = `${diff / 3600} hours`
+			if (diffToSec >= 60) {
+				value.message = `${diffToSec / 60} minutes`
 			}
-			if (diff >= 86400) {
-				value.message = `${diff / 86400} days`
+			if (diffToSec >= 3600) {
+				value.message = `${diffToSec / 3600} hours`
+			}
+			if (diffToSec >= 86400) {
+				value.message = `${diffToSec / 86400} days`
 			}
 		}
 		console.log("Task completed Value:", value.message)
@@ -97,26 +100,29 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 	}
 
 	const getItems = async (id) => {
-		let results = await axios.get(`/v1/api/todoList/${id}`)
-		let returnedResults = results.data
-		setCreateDate(returnedResults.dateCreated)
-		// setUpdatedDate(returnedResults.dateUpdated)
-		setTask(returnedResults.task)
-		setDescription(returnedResults.description)
-		setStatus(returnedResults.status)
-		setTimeOnTask(returnedResults.timeOnTask)
-	}
-
-	const patchValues = (id, values) => {
-		axios.patch(`/v1/api/editItem/${id}`, values).then((res) => res.data)
-	}
-
-	useEffect(() => {
 		try {
-			getItems(itemId)
+			let results = await axios.get(`/v1/api/todoList/${id}`)
+			let returnedResults = results.data
+			console.log("returned Results", returnedResults)
+			setCreateDate(returnedResults.dateCreated)
+			// setUpdatedDate(returnedResults.dateUpdated)
+			setTask(returnedResults.task)
+			setDescription(returnedResults.description)
+			setStatus(returnedResults.status)
+			setTimeOnTask(returnedResults.timeOnTask)
 		} catch (error) {
 			console.error(error)
 		}
+	}
+
+	const patchValues = (id, values) => {
+		try {
+			axios.patch(`/v1/api/editItem/${id}`, values).then((res) => res.data)
+		} catch (error) {}
+	}
+
+	useEffect(() => {
+		getItems(itemId)
 	}, [])
 
 	// status, dtSt, dtFn
@@ -141,13 +147,19 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 					values.dateCreated = createDate
 
 					values.dateFinished = finishedDate
-					values.timeOnTask = taskCompleted(status, updatedDate, finishedDate)
+					values.timeOnTask = taskCompleted(
+						status,
+						updatedDate,
+						finishedDate,
+						timeOnTask
+					)
 					console.log("submitvalues:", values)
 					patchValues(itemId, values)
 					setSubmitting(false)
 					resetForm(initialValues)
 					changeTask()
 					getCurrentList()
+					getItems(itemId)
 				}}>
 				{({
 					values,
