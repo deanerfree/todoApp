@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useState } from "react"
 import "../App.css"
 import axios from "axios"
 import { Field, Formik } from "formik"
@@ -46,12 +46,9 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 	}
 
 	const handleUpdateDate = () => {
-		console.log("running")
 		setUpdatedDate(currentDate)
 	}
 
-	console.log("update Date", updatedDate)
-	console.log("Finish Date", finishedDate)
 	const handleFinishedDate = () => {
 		console.log("handle finsihed")
 		setFinishedDate(currentDate)
@@ -72,28 +69,30 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 	}
 
 	const taskCompleted = (status, dtSt, dtFn) => {
-		let value = 0
+		let value = { time: 0, message: "" }
 		if (status !== "Completed") return
 		if (status === "Completed") {
 			let diff = moment(dtFn, "DD/MM/YYYY HH:mm:ss").diff(
 				moment(dtSt, "DD/MM/YYYY HH:mm:ss")
 			)
+			value.time = diff
+			diff = diff / 1000
 			console.log(diff)
 
 			if (diff < 60) {
-				value = `${diff} seconds`
+				value.message = `${diff} seconds`
 			}
 			if (diff >= 60) {
-				value = `${diff / 60} minutes`
+				value.message = `${diff / 60} minutes`
 			}
 			if (diff >= 3600) {
-				value = `${diff / 3600} hours`
+				value.message = `${diff / 3600} hours`
 			}
 			if (diff >= 86400) {
-				value = `${diff / 86400} days`
+				value.message = `${diff / 86400} days`
 			}
 		}
-		console.log("Task completed Value:", value)
+		console.log("Task completed Value:", value.message)
 		return value
 	}
 
@@ -101,7 +100,7 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 		let results = await axios.get(`/v1/api/todoList/${id}`)
 		let returnedResults = results.data
 		setCreateDate(returnedResults.dateCreated)
-		setUpdatedDate(returnedResults.dateUpdated)
+		// setUpdatedDate(returnedResults.dateUpdated)
 		setTask(returnedResults.task)
 		setDescription(returnedResults.description)
 		setStatus(returnedResults.status)
@@ -202,7 +201,6 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 														control={<Radio />}
 														label='In Process'
 														onClick={() => {
-															console.log("clicked In Process")
 															handleUpdateDate()
 														}}
 													/>
@@ -211,7 +209,6 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 														control={<Radio />}
 														label='Complete'
 														onClick={() => {
-															console.log("clicked Completed")
 															handleFinishedDate()
 														}}
 													/>
