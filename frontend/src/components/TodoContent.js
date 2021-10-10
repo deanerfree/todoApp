@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import "../App.css"
 import axios from "axios"
 import { Formik } from "formik"
-import { Button, TextField, Card, Modal } from "@mui/material"
+import { Button, TextField, Card } from "@mui/material"
 import LoadingContent from "./LoadingContent"
 import TodoList from "./TodoList"
 
@@ -51,8 +51,10 @@ const TodoContent = () => {
 	console.log(currentListItems)
 
 	return (
-		<div>
-			<h2>Todo Content</h2>
+		<div className='wrapper'>
+			<div className='title'>
+				<h2>Things To Get Done:</h2>
+			</div>
 			<Card className='formWrapper'>
 				<Formik
 					initialValues={initialValues}
@@ -60,8 +62,8 @@ const TodoContent = () => {
 						values.id = currentListItems.length
 						values.status = options[0].status
 						values.timeOnTask = 0
-						values.dateCreated = currentDate.getDate()
-						values.dateUpdated = currentDate.getDate()
+						values.dateCreated = currentDate
+						values.dateUpdated = currentDate
 						values.dateFinished = 0
 						axios.post("/v1/api/createItem", values)
 						getCurrentList()

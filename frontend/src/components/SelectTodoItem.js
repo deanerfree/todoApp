@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import "../App.css"
 import axios from "axios"
 import { Field, Formik } from "formik"
@@ -10,6 +10,7 @@ import {
 	RadioGroup,
 	FormControl,
 	FormControlLabel,
+	CardContent,
 } from "@mui/material"
 import { Edit, Close } from "@mui/icons-material"
 
@@ -17,14 +18,13 @@ import LoadingContent from "./LoadingContent"
 import DisplayTodoContent from "./DisplayTodoContent"
 import moment from "moment"
 
-const options = [
-	{ value: "Not Started" },
-	{ value: "In Process" },
-	{ value: "Completed" },
-]
-const currentDate = new Date()
-
 const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
+	const options = [
+		{ value: "Not Started" },
+		{ value: "In Process" },
+		{ value: "Completed" },
+	]
+	const currentDate = new Date()
 	const [createDate, setCreateDate] = useState()
 	const [updatedDate, setUpdatedDate] = useState()
 	const [finishedDate, setFinishedDate] = useState()
@@ -42,16 +42,23 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 		status: status,
 		task: "",
 		description: "",
+		updatedDate: 0,
 	}
 
-	const handleRadioChange = (event) => {
-		setStatus(event.target.value)
-		if (event.target.value === options[2].value) {
-			setFinishedDate(currentDate)
-		}
-		if (event.target.value === options[1].value) {
-			setUpdatedDate(currentDate)
-		}
+	const handleUpdateDate = () => {
+		console.log("running")
+		setUpdatedDate(currentDate)
+	}
+
+	console.log("update Date", updatedDate)
+	console.log("Finish Date", finishedDate)
+	const handleFinishedDate = () => {
+		console.log("handle finsihed")
+		setFinishedDate(currentDate)
+	}
+
+	const handleRadioChange = (e) => {
+		setStatus(e.target.value)
 	}
 
 	const changeTask = () => {
@@ -66,10 +73,13 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 
 	const taskCompleted = (status, dtSt, dtFn) => {
 		let value = 0
+		if (status !== "Completed") return
 		if (status === "Completed") {
 			let diff = moment(dtFn, "DD/MM/YYYY HH:mm:ss").diff(
 				moment(dtSt, "DD/MM/YYYY HH:mm:ss")
 			)
+			console.log(diff)
+
 			if (diff < 60) {
 				value = `${diff} seconds`
 			}
@@ -90,15 +100,12 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 	const getItems = async (id) => {
 		let results = await axios.get(`/v1/api/todoList/${id}`)
 		let returnedResults = results.data
-		console.log(results.data)
 		setCreateDate(returnedResults.dateCreated)
 		setUpdatedDate(returnedResults.dateUpdated)
 		setTask(returnedResults.task)
 		setDescription(returnedResults.description)
 		setStatus(returnedResults.status)
 		setTimeOnTask(returnedResults.timeOnTask)
-
-		console.log(typeof returnedResults.dateUpdated)
 	}
 
 	const patchValues = (id, values) => {
@@ -118,7 +125,7 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 	return (
 		<Card
 			style={{
-				backgroundColor: "#b3eaff",
+				backgroundColor: "#aae0f9",
 			}}>
 			<Formik
 				initialValues={initialValues}
@@ -131,11 +138,11 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 					}
 					values.id = itemId
 					values.status = status
-					values.dateCreated = createDate
 					values.dateUpdated = updatedDate
+					values.dateCreated = createDate
+
 					values.dateFinished = finishedDate
 					values.timeOnTask = taskCompleted(status, updatedDate, finishedDate)
-
 					console.log("submitvalues:", values)
 					patchValues(itemId, values)
 					setSubmitting(false)
@@ -157,8 +164,8 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 						<div>
 							{createTask ? (
 								<form onSubmit={handleSubmit}>
-									<div>
-										<div className='form' onSubmit={handleSubmit}>
+									<Card className='form' onSubmit={handleSubmit}>
+										<CardContent>
 											<Typography>Task: {task}</Typography>
 											<Field
 												type='task'
@@ -179,6 +186,7 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 
 											<FormControl component='fieldset'>
 												<RadioGroup
+													row
 													aria-label='Task Status'
 													defaultValue='Not Started'
 													name='radio-buttons-group'
@@ -193,18 +201,27 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 														value={options[1].value}
 														control={<Radio />}
 														label='In Process'
+														onClick={() => {
+															console.log("clicked In Process")
+															handleUpdateDate()
+														}}
 													/>
 													<FormControlLabel
 														value={options[2].value}
 														control={<Radio />}
 														label='Complete'
+														onClick={() => {
+															console.log("clicked Completed")
+															handleFinishedDate()
+														}}
 													/>
 												</RadioGroup>
 											</FormControl>
-										</div>
+										</CardContent>
 										<div className='buttonWrapper'>
 											<div className='buttonItems'>
 												<Button
+													style={{ backgroundColor: "#1976d1", color: "white" }}
 													variant='outlined'
 													type='submit'
 													disabled={isSubmitting}>
@@ -221,15 +238,17 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 												</Button>
 											</div>
 										</div>
-									</div>
+									</Card>
 								</form>
 							) : (
 								<Card
 									style={{
-										backgroundColor: "#b3eaff",
+										backgroundColor: "#c8eeff",
 									}}>
 									<div className='editField'>
-										<Typography>Todo Item {itemId + 1}</Typography>
+										<div className='editIconTitle'>
+											<Typography>Todo Item {itemId + 1}</Typography>
+										</div>
 										<div className='editIcons'>
 											<div className='editIcon' onClick={changeTask}>
 												<Edit />
@@ -255,6 +274,7 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 											item={status}
 											editItem={changeEditStatus}
 										/>
+										<div id='created'>Date Created: {createDate}</div>
 									</Card>
 								</Card>
 							)}
