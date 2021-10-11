@@ -68,36 +68,54 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 		setEditStatus(!editStatus)
 	}
 
-	const taskCompleted = (status, dtSt, dtFn, tmtsk) => {
+	const taskCompleted = (status, dtSt, dtFn, tmtsk, est) => {
 		if (status !== "Completed") return tmtsk
-		let value = { time: 0, message: "" }
+		let value = { time: 0, message: "", overUnder: "" }
 		let diff = moment(dtFn, "DD/MM/YYYY HH:mm:ss").diff(
 			moment(dtSt, "DD/MM/YYYY HH:mm:ss")
 		)
 		let diffToSec = diff / 1000
-		value.time = diffToSec
+		value.time = Math.floor(diffToSec)
+		diffToSec = value.time
 
-		console.log(diffToSec)
 		if (status === "Completed") {
 			if (tmtsk.time > 0) {
 				value.time = diffToSec + tmtsk.time
-				diffToSec = value.time
+				diffToSec = Math.floor(value.time)
 			}
 
 			if (diffToSec < 60) {
-				value.message = `${Math.floor(diffToSec)} seconds`
+				value.message = `${diffToSec} seconds`
 			}
 			if (diffToSec >= 60) {
-				value.message = `${diffToSec / 60} minutes`
+				value.message = `${(diffToSec / 60).toFixed(2)} minutes`
 			}
 			if (diffToSec >= 3600) {
-				value.message = `${diffToSec / 3600} hours`
+				value.message = `${(diffToSec / 3600).toFixed(2)} hours`
 			}
 			if (diffToSec >= 86400) {
-				value.message = `${diffToSec / 86400} days`
+				value.message = `${(diffToSec / 86400).toFixed(2)} days`
 			}
 		}
+		value.time = Math.floor(value.time)
+		value.overUnder = estTimeInSec(est, value)
+		return value
+	}
 
+	const estTimeInSec = (est, time) => {
+		let value = { time: 0, message: "" }
+		value.time = est * 3600
+
+		if (value.time > time.time) {
+			value.message = "Over Time"
+		}
+		if (value.time < time.time) {
+			value.message = "Under Time"
+		}
+		if (value.time === time.time) {
+			value.message = "On time"
+		}
+		value.time = Math.floor(value.time)
 		return value
 	}
 
@@ -156,7 +174,8 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 						status,
 						updatedDate,
 						finishedDate,
-						timeOnTask
+						timeOnTask,
+						estimatedTime
 					)
 					console.log("submitvalues:", values)
 					patchValues(itemId, values)
@@ -180,7 +199,7 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 								<form onSubmit={handleSubmit}>
 									<Card className='form' onSubmit={handleSubmit}>
 										<CardContent>
-											<Typography>Task: {task}</Typography>
+											<Typography>Task:</Typography>
 											<Field
 												type='task'
 												name='task'
@@ -188,7 +207,7 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 												value={values.task}
 												onChange={handleChange}
 											/>
-											<Typography>Estimated Time: {estimatedTime}</Typography>
+											<Typography>Estimated Time:</Typography>
 											<Field
 												type='number'
 												name='time'
@@ -196,10 +215,13 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 												value={values.estimatedTime}
 												onChange={handleChange}
 											/>
-											<Typography>Description: {description}</Typography>
+											<Typography>Description:</Typography>
 											<Field
 												type='description'
 												name='description'
+												component='textarea'
+												rows='10'
+												cols={40}
 												placeholder={description}
 												value={values.description}
 												onChange={handleChange}
@@ -288,18 +310,21 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 									<Card className='form'>
 										<div className='displayItemStatus'>
 											<div className='displayItem'>
-												<div>
-													<DisplayTodoContent
-														type={actionType[2]}
-														item={status}
-														editItem={changeEditStatus}
-													/>
-													{timeOnTask ? (
-														<div className='editField'>
-															{timeOnTask.message}
+												<DisplayTodoContent
+													type={actionType[2]}
+													item={status}
+													editItem={changeEditStatus}
+												/>
+												{timeOnTask ? (
+													<div className='estItems'>
+														<div className='estItem'>
+															Time taken: {timeOnTask.message}
 														</div>
-													) : null}
-												</div>
+														<div className='estItem'>
+															Time management: {timeOnTask.overUnder.message}
+														</div>
+													</div>
+												) : null}
 											</div>
 										</div>
 										<DisplayTodoContent

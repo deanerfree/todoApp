@@ -1,4 +1,25 @@
-let itemList = []
+let itemList = [
+	{
+		dateCreated: Date("2021-10-10T00:00:00.037Z"),
+		dateUpdated: Date("2021-10-11T00:00:00.037Z"),
+		dateFinished: Date("2021-10-12T00:00:00.037Z"),
+		description: `Charrue de torvisse de saint-ciarge de mosus de bâtard de torrieux de cimonaque de saintes fesses de crucifix de ciarge de cul.
+Patente à gosse de verrat de mautadit de batèche de mosus de caltor de bout d'viarge d'enfant d'chienne d'étole de doux Jésus de viande à chien.
+Purée de saint-cimonaque de sacréfice de mosus de cibole de tabarouette de charogne de sacristi de bâtard d'ostifie de ciarge.`,
+		id: 0,
+		status: "Completed",
+		task: "Make coffee",
+		time: 86400,
+		timeOnTask: {
+			time: 86400,
+			message: "1 day",
+			overUnder: {
+				message: "On time",
+				time: 3600,
+			},
+		},
+	},
+]
 
 // @desc    Get all Todo Items: GET
 // @route   http://localhost:5000/v1/api/todoList
