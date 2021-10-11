@@ -20,11 +20,12 @@ import moment from "moment"
 
 const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 	const options = [
-		{ value: "Not Started" },
+		{ value: "Planned" },
 		{ value: "In Process" },
 		{ value: "Completed" },
 	]
 	const currentDate = new Date()
+	const [estimatedTime, setEstimatedTime] = useState()
 	const [createDate, setCreateDate] = useState()
 	const [updatedDate, setUpdatedDate] = useState()
 	const [finishedDate, setFinishedDate] = useState()
@@ -42,6 +43,7 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 		status: status,
 		task: "",
 		description: "",
+		time: null,
 	}
 
 	const handleUpdateDate = () => {
@@ -49,7 +51,6 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 	}
 
 	const handleFinishedDate = () => {
-		console.log("handle finished")
 		setFinishedDate(currentDate)
 	}
 
@@ -79,11 +80,12 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 		console.log(diffToSec)
 		if (status === "Completed") {
 			if (tmtsk.time > 0) {
-				value.time = diffToSec + tmtsk
+				value.time = diffToSec + tmtsk.time
+				diffToSec = value.time
 			}
 
 			if (diffToSec < 60) {
-				value.message = `${diffToSec} seconds`
+				value.message = `${Math.floor(diffToSec)} seconds`
 			}
 			if (diffToSec >= 60) {
 				value.message = `${diffToSec / 60} minutes`
@@ -95,7 +97,7 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 				value.message = `${diffToSec / 86400} days`
 			}
 		}
-		console.log("Task completed Value:", value.message)
+
 		return value
 	}
 
@@ -110,6 +112,7 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 			setDescription(returnedResults.description)
 			setStatus(returnedResults.status)
 			setTimeOnTask(returnedResults.timeOnTask)
+			setEstimatedTime(returnedResults.time)
 		} catch (error) {
 			console.error(error)
 		}
@@ -123,6 +126,8 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 
 	useEffect(() => {
 		getItems(itemId)
+
+		// eslint-disable-next-line
 	}, [])
 
 	// status, dtSt, dtFn
@@ -145,7 +150,7 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 					values.status = status
 					values.dateUpdated = updatedDate
 					values.dateCreated = createDate
-
+					values.time = estimatedTime
 					values.dateFinished = finishedDate
 					values.timeOnTask = taskCompleted(
 						status,
@@ -163,12 +168,10 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 				}}>
 				{({
 					values,
-					errors,
-					touched,
 					handleChange,
-					handleBlur,
 					handleSubmit,
 					isSubmitting,
+					resetForm,
 					/* and other goodies */
 				}) =>
 					task || description || status ? (
@@ -183,6 +186,14 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 												name='task'
 												placeholder={task}
 												value={values.task}
+												onChange={handleChange}
+											/>
+											<Typography>Estimated Time: {estimatedTime}</Typography>
+											<Field
+												type='number'
+												name='time'
+												placeholder={estimatedTime}
+												value={values.estimatedTime}
 												onChange={handleChange}
 											/>
 											<Typography>Description: {description}</Typography>
@@ -206,7 +217,7 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 													<FormControlLabel
 														value={options[0].value}
 														control={<Radio />}
-														label='Not Started'
+														label='Planned'
 													/>
 													<FormControlLabel
 														value={options[1].value}
@@ -241,8 +252,11 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 												<Button
 													style={{ backgroundColor: "red", color: "white" }}
 													variant='outlined'
-													type='cancel'
-													onClick={changeTask}>
+													type='reset'
+													onClick={() => {
+														changeTask()
+														resetForm()
+													}}>
 													Cancel
 												</Button>
 											</div>
@@ -256,7 +270,11 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 									}}>
 									<div className='editField'>
 										<div className='editIconTitle'>
-											<Typography>Todo Item {itemId + 1}</Typography>
+											<Typography
+												variant='h1'
+												style={{ fontSize: "20px", fontWeight: "500" }}>
+												{task}
+											</Typography>
 										</div>
 										<div className='editIcons'>
 											<div className='editIcon' onClick={changeTask}>
@@ -268,21 +286,28 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 										</div>
 									</div>
 									<Card className='form'>
-										<DisplayTodoContent
-											type={actionType[0]}
-											item={task}
-											editItem={changeTask}
-										/>
+										<div className='displayItemStatus'>
+											<div className='displayItem'>
+												<div>
+													<DisplayTodoContent
+														type={actionType[2]}
+														item={status}
+														editItem={changeEditStatus}
+													/>
+													{timeOnTask ? (
+														<div className='editField'>
+															{timeOnTask.message}
+														</div>
+													) : null}
+												</div>
+											</div>
+										</div>
 										<DisplayTodoContent
 											type={actionType[1]}
 											item={description}
 											editItem={changeDescription}
 										/>
-										<DisplayTodoContent
-											type={actionType[2]}
-											item={status}
-											editItem={changeEditStatus}
-										/>
+
 										<div id='created'>Date Created: {createDate}</div>
 									</Card>
 								</Card>
