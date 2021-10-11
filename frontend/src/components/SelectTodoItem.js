@@ -220,7 +220,7 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 												type='description'
 												name='description'
 												component='textarea'
-												rows='10'
+												rows={10}
 												cols={40}
 												placeholder={description}
 												value={values.description}
