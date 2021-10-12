@@ -97,9 +97,9 @@ const TodoContent = () => {
 										<h2>Estimated time</h2>
 										<TextField
 											variant='outlined'
-											placeholder='Enter a time'
+											placeholder='Enter a time in hours'
 											id='outlined-multiline-static'
-											label='Estimated Time'
+											label='Estimated Time in hours'
 											rows={0}
 											type='number'
 											name='time'
