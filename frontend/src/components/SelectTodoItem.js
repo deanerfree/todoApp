@@ -104,12 +104,13 @@ const SelectTodoItem = ({ itemId, removeItem, getCurrentList }) => {
 
 	const estTimeInSec = (est, time) => {
 		let value = { time: 0, message: "" }
+
 		value.time = est * 3600
 
-		if (value.time > time.time) {
+		if (value.time < time.time) {
 			value.message = "Over Time"
 		}
-		if (value.time < time.time) {
+		if (value.time > time.time) {
 			value.message = "Under Time"
 		}
 		if (value.time === time.time) {
